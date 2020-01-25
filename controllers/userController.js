@@ -1,4 +1,6 @@
 const User = require('../models/User')
+const Post = require('../models/Post')
+
 
 exports.mustBeLoggedIn = function(req, res, next) {
     if (req.session.user){
@@ -38,6 +40,12 @@ exports.viewRegisterScreen = function(req, res) {
 
 }
 
+exports.viewProfile = function(req, res) {
+   
+        res.render('profile')
+    
+}
+
 exports.register = function(req, res) {
     let user = new User(req.body)
     user.register().then(() => {
@@ -55,10 +63,51 @@ exports.register = function(req, res) {
     })
 }
 
-exports.home = function(req, res) {
-    if(req.session.user) {
-        res.render('vim-dashboard')
-    } else {
-        res.render('home-guest', {errors: req.flash('errors'), regErrors: req.flash('regErrors')})
-    }
+ exports.home = function(req, res) {
+     if(req.session.user) {
+         res.render('vim-dashboard')
+     } else {
+         res.render('home-guest', {regErrors: req.flash('regErrors')})
+     }
+ }
+
+
+
+exports.ifUserExists = function(req, res, next) {
+    User.findByUsername(req.params.username).then(function(userDocument) {
+        req.profileUser = userDocument
+        next()
+    }).catch(function() {
+        res.render("404")
+    })
 }
+
+exports.profilePostScreen = function(req, res) {
+    //ask our post model for posts by a certain author id
+    Post.findByAuthorId(req.profileUser._id).then(function(posts) {
+        res.render('list-buildings', {
+            posts: posts,
+            profileUsername: req.profileUser.username,
+            profileAvatar: req.profileUser.avatar
+        })
+    }).catch(function() {
+        res.render("404")
+    })
+    
+   
+}
+
+// exports.listBuildings = function(req, res) {
+//     //ask our post model for posts by a certain author id
+//     Post.findByAuthorId(req.profileUser._id).then(function(posts) {
+//         res.render('list-buildings', {
+//             posts: posts,
+//             profileUsername: req.profileUser.username,
+//             profileAvatar: req.profileUser.avatar
+//         })
+//     }).catch(function() {
+//         res.render("404")
+//     })
+    
+   
+// }
