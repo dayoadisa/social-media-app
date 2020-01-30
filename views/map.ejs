@@ -15,12 +15,29 @@
             
             <div id="map" ></div>
             
-            <button id="add" data-toggle="modal" data-target="#modalRegisterForm"><i class="fas fa-plus-circle"></i></button>
-
+            
+            
+            <!-- <button id="add" data-toggle="modal" data-target="#modalRegisterForm"><i class="fas fa-plus-circle"></i></button>  -->
+            
+            <div id="add"  style="width: 8rem; margin-left: 550px;">
+              <%- include('includes/flash') %>
+              <div class="card-header">
+                
+                <button type="button" class="btn btn-default" aria-label="Left Align">
+                <a href="/post/<%= post._id %>/edit"><i class="fas fa-edit"></i></a>  
+                </button>
+          
+                <form class="delete-post-form d-inline" action="/post/<%= post._id %>/delete" method="POST">
+                  <button  class="delete-post-button text-danger" data-toggle="tooltip" data-placement="top" title="Delete"><i class="fas fa-trash"></i></button >
+                </form>
+              </div>
+             
+              
+            </div>
             
 
-  <%- include('includes/flash') %>
-  <div class="text-center card" style="width: 18rem; margin-left: 550px;">
+  
+  <!-- <div class="text-center card" style="width: 18rem; margin-left: 550px;">
     <div class="card-header">
       Buildings
       <button type="button" class="btn btn-default" aria-label="Left Align">
@@ -38,7 +55,7 @@
       <li class="list-group-item">Created By: <%= post.author.username %></li>
       <li class="list-group-item">Date: <%= post.createdDate.getMonth() + 1 %>/<%= post.createdDate.getDate() %>/<%= post.createdDate.getFullYear() %>.</li>
     </ul>
-  </div>
+  </div> -->
           <!-- Content Row -->
           
         </div>
@@ -65,46 +82,6 @@
   </div>
 
 
-<div class="modal fade" id="modalRegisterForm" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
-aria-hidden="true">
-<div class="modal-dialog" role="document">
-  <div class="modal-content">
-    <div class="modal-header text-center">
-      <h4 class="modal-title w-100 font-weight-bold">Add building</h4>
-      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-        <span aria-hidden="true">&times;</span>
-      </button>
-    </div>
-    <div class="modal-body mx-3">
-      <form action="/register" method="POST"  class="user"></form>
-      <div class="form-group">
-        <input type="text" class="form-control form-control-user" name="buildingName" id="building-name" placeholder="Building Name">
-    </div> 
-    
-    <div id="geocoder" class="geocoder form-group">
-      
-    </div>
-    <div class="form-group">
-      <select class="form-control">
-        <option>Select Region</option>
-        <option>Europe</option>
-        <option>Asia</option>
-        <option>Americas</option>
-        <option>Africa</option>
-      </select>
-      
-    </div>
-
-    <div class="modal-footer">
-      <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-      <button  onclick="myFunction()"  class="btn btn-primary btn-user btn-block">Next</button>
-    </div>
-    </form>
-    </div>
-    
-    </div>
-  </div>
-</div>
 
 </div>
 
@@ -120,6 +97,21 @@ container: 'map',
 center: (post.coordinates),
  zoom: 16
  });
+
+
+ 
+// create a HTML element for our post location/marker
+var el = document.createElement('div');
+el.className = 'marker';
+
+// make a marker for our location and add to the map
+new mapboxgl.Marker(el)
+  .setLngLat(post.coordinates)
+  .setPopup(new mapboxgl.Popup({ offset: 25 }) // add popups
+  .setHTML('<h3>' + post.name + '</h3><p>' + post.address + '</p>'))
+  .addTo(map);
+
+
 
 </script>
 
