@@ -1,12 +1,12 @@
 const postsCollection = require('../db').db().collection('posts')
 const ObjectID = require('mongodb').ObjectID
 const User = require('./User')
+const Layer = require('./Layer')
 const sanitizeHTML = require('sanitize-html')
 
 
 
-
-let Post = function(data, userid, requestedPostId) {
+let Post = function (data, userid, requestedPostId) {
     this.data = data
     this.errors = []
     this.userid = userid
@@ -14,40 +14,50 @@ let Post = function(data, userid, requestedPostId) {
 }
 
 
-Post.prototype.cleanUp = function() {
-    if (typeof(this.data.name) != "string") {this.data.name = ""}
-    if (typeof(this.data.address) != "string") {this.data.address = ""}
-    if (typeof(this.data.language) != "string") {this.data.language = ""}
+Post.prototype.cleanUp = function () {
+    if (typeof (this.data.name) != "string") { this.data.name = "" }
+    if (typeof (this.data.address) != "string") { this.data.address = "" }
+    if (typeof (this.data.language) != "string") { this.data.language = "" }
     
+
 
     //get rid of bogus properties
     this.data = {
-        name : this.data.name.trim(),
-        address : this.data.address.trim(),
-        language : this.data.language.trim(),
-        createdDate : new Date(),
+        name: this.data.name.trim(),
+        address: this.data.address.trim(),
+        language: this.data.language.trim(),
+        createdDate: new Date(),
         author: ObjectID(this.userid),
-        coordinates: this.data.coordinates
+        coordinates: this.data.coordinates,
+        geometry: {
+            type: {
+                type: String,
+                enum: ['Point'],
+                required: true
+            },
+            coordinates: this.data.coordinates,
+        },
+        properties: {
+            description: String
+        },
+
+
     }
-    
+
 }
 
-Post.prototype.validate = function() {
-    if (this.data.name == "") {this .errors.push("You must provide building name")}
-    if (this.data.address == "") {this .errors.push("You must provide a address for new building")}
-    if (this.data.language == "") {this .errors.push("You must select a language")}
-    
+Post.prototype.validate = function () {
+    if (this.data.name == "") { this.errors.push("You must provide building name") }
+    if (this.data.address == "") { this.errors.push("You must provide a address for new building") }
+    if (this.data.language == "") { this.errors.push("You must select a language") }
 }
 
-// Post.prototype.validate = function() {
-//     if (this.data.name == "") {this.errors.push}
-// }
 
-Post.prototype.create = function() {
-    return new Promise( (resolve, reject) => {
+Post.prototype.create = function () {
+    return new Promise((resolve, reject) => {
         this.cleanUp()
         this.validate()
-        if(!this.errors.length) {
+        if (!this.errors.length) {
             //save post into database
             postsCollection.insertOne(this.data).then((info) => {
                 resolve(info.ops[0]._id)
@@ -61,16 +71,16 @@ Post.prototype.create = function() {
     })
 }
 
-Post.prototype.update = function() {
+Post.prototype.update = function () {
     return new Promise(async (resolve, reject) => {
         try {
             let post = await Post.findSingleById(this.requestedPostId, this.userid)
             if (post.isVisitorOwner) {
                 //actually update the db
-              let status =  await this.actuallyUpdate()
+                let status = await this.actuallyUpdate()
                 resolve(status)
             } else {
-               reject() 
+                reject()
             }
         } catch {
             reject()
@@ -78,113 +88,125 @@ Post.prototype.update = function() {
     })
 }
 
-Post.prototype.actuallyUpdate = function() {
+Post.prototype.actuallyUpdate = function () {
     return new Promise(async (resolve, reject) => {
         this.cleanUp()
         this.validate()
         if (!this.errors.length) {
-           await postsCollection.findOneAndUpdate({_id: new ObjectID(this.requestedPostId)}, {$set: {name: this.data.name, address: this.data.address, coordinates: this.data.coordinates }})
-           resolve("success")
+            await postsCollection.findOneAndUpdate({ _id: new ObjectID(this.requestedPostId) }, { $set: { name: this.data.name, address: this.data.address, coordinates: this.data.coordinates } })
+            resolve("success")
         } else {
             resolve("failure")
         }
     })
 }
 
-Post.reusablePostQuery = function(uniqueOperations, visitorId) {
-    return new Promise(async function(resolve, reject) {
-      let aggOperations = uniqueOperations.concat([
-        {$lookup: {from: "users", localField: "author", foreignField: "_id", as: "authorDocument"}},
-        {$project: {
-            name: 1,
-            address: 1,
-            createdDate: 1,
-            coordinates: 1,
-            authorId: "$author",
-            author: {$arrayElemAt: ["$authorDocument", 0]}
-        }}
-    ])
-      let posts = await postsCollection.aggregate(aggOperations).toArray()
-    
-      //clean up author property in each post object
-      posts = posts.map(function(post) {
-       
-        post.isVisitorOwner = post.authorId.equals(visitorId)
-        post.authorId = undefined
+Post.reusablePostQuery = function (uniqueOperations, visitorId) {
+    return new Promise(async function (resolve, reject) {
+        let aggOperations = uniqueOperations.concat([
+            { $lookup: { from: "users", localField: "author", foreignField: "_id", as: "authorDocument" } },
+            {
+                $project: {
+                    name: 1,
+                    address: 1,
+                    createdDate: 1,
+                    coordinates: 1,
+                    authorId: "$author",
+                    author: { $arrayElemAt: ["$authorDocument", 0] }
+                }
+            }
+        ])
+        let posts = await postsCollection.aggregate(aggOperations).toArray()
 
-          post.author = {
-              username: post.author.username,
-              avatar: new User(post.author, true).avatar
-               
-          }
-          
-          return post
-          console.log(post)
-      })
+        //clean up author property in each post object
+        posts = posts.map(function (post) {
 
-      resolve(posts)
+            post.isVisitorOwner = post.authorId.equals(visitorId)
+            post.authorId = undefined
+
+            post.author = {
+                username: post.author.username,
+                avatar: new User(post.author, true).avatar
+
+            }
+
+            return post
+            console.log(post)
+        })
+
+        resolve(posts)
     })
-  }
+}
 
 
-Post.findSingleById = function(id, visitorId) {
-    return new Promise(async function(resolve, reject) {
-      if (typeof(id) != "string" || !ObjectID.isValid(id)) {
-        reject()
-        return
-      }
-      
-      let posts = await Post.reusablePostQuery([
-          {$match: {_id: new ObjectID(id)}}
-      ], visitorId)
-
-      if (posts.length) {
-          console.log(posts[0])
-        resolve(posts[0])
-      } else {
-        reject()
-      }
-    })
-  }
-
- 
-
-  Post.findByAuthorId = function(authorId) {
-    return Post.reusablePostQuery([
-        {$match: {author: authorId}},
-        {$sort: {createdDate: -1}}
-    ])
-  }
-
-  Post.delete = function(postIdToDelete, currentUserId) {
-      return new Promise(async (resolve, reject) => {
-          try {
-              let post = await Post.findSingleById(postIdToDelete, currentUserId)
-              if (post.isVisitorOwner) {
-               await postsCollection.deleteOne({_id: new ObjectID(postIdToDelete)})
-               resolve()
-              } else {
-                  reject()
-              }
-          } catch (error) {
-              
-          }
-      })
-  }
-
-  Post.search = function(searchTerm) {
-      return new Promise(async (resolve, reject) => {
-          if (typeof(searchTerm) == "string") {
-              let posts = await Post.reusablePostQuery([
-                 {$match: {$text: {$search: searchTerm}}},
-                 {$sort: {score: {$meta: "textScore"}}} 
-              ])
-              resolve(posts)
-          } else {
+Post.findSingleById = function (id, visitorId) {
+    return new Promise(async function (resolve, reject) {
+        if (typeof (id) != "string" || !ObjectID.isValid(id)) {
             reject()
-          }
-      })
-  }
+            return
+        }
+
+        let posts = await Post.reusablePostQuery([
+            { $match: { _id: new ObjectID(id) } }
+        ], visitorId)
+
+        if (posts.length) {
+            console.log(posts[0])
+            resolve(posts[0])
+        } else {
+            reject()
+        }
+    })
+}
+
+
+
+Post.findByAuthorId = function (authorId) {
+    return Post.reusablePostQuery([
+        { $match: { author: authorId } },
+        { $sort: { createdDate: -1 } }
+    ])
+}
+
+Post.delete = function (postIdToDelete, currentUserId) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            let post = await Post.findSingleById(postIdToDelete, currentUserId)
+            if (post.isVisitorOwner) {
+                await postsCollection.deleteOne({ _id: new ObjectID(postIdToDelete) })
+                resolve()
+            } else {
+                reject()
+            }
+        } catch (error) {
+
+        }
+    })
+}
+
+Post.search = function (searchTerm) {
+    return new Promise(async (resolve, reject) => {
+        if (typeof (searchTerm) == "string") {
+            let posts = await Post.reusablePostQuery([
+                { $match: { $text: { $search: searchTerm } } },
+                { $sort: { score: { $meta: "textScore" } } }
+            ])
+            resolve(posts)
+        } else {
+            reject()
+        }
+    })
+}
+
+Post.findAll = function () {
+    let posts = postsCollection.find().toArray(function (err, result) {
+        if (err) throw err;
+        console.log('new:', result);
+
+
+    })
+}
+
 
 
 module.exports = Post
