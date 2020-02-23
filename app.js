@@ -6,6 +6,7 @@ const markdown = require('marked')
 const csrf = require('csurf')
 const app = express()
 const cors = require('cors')
+const path = require('path')
 
 
 // Testing indoor-api

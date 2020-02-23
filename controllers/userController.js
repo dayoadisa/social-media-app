@@ -1,5 +1,6 @@
 const User = require('../models/User')
 const Post = require('../models/Post')
+const Layer = require('../models/Layer')
 const login = require('../indoor-nav/buildings');
 
 
@@ -84,11 +85,11 @@ exports.ifUserExists = function (req, res, next) {
 }
 
 exports.profilePostScreen = function (req, res) {
+    
     //ask our post model for posts by a certain author id
     Post.findByAuthorId(req.profileUser._id).then(function (posts) {
 
         res.render('list-buildings', {
-
             posts: posts,
             profileUsername: req.profileUser.username,
             profileAvatar: req.profileUser.avatar
@@ -101,5 +102,29 @@ exports.profilePostScreen = function (req, res) {
 
 }
 
+exports.profileLayerScreen =  function (req, res, next) {
 
+    
+    
+    //ask our layer model for layers(floors) created by a certain author id
+    Layer.findByAuthorId(req.profileUser._id).then( function (layers) {
+        
+        res.render('layer-list', {
+           
+            layers: layers,
+            post: req.profileUser._id,
+            profileUsername: req.profileUser.username,
+            //profileAvatar: req.profileUser.avatar
+        })
+        
+      
+    }).catch(function () {
+
+        res.render("404")
+    })
+
+ 
+
+
+}
 

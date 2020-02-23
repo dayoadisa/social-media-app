@@ -3,13 +3,7 @@ const Layer = require('../models/Layer')
 const mbxGeocoding = require('@mapbox/mapbox-sdk/services/geocoding');
 const geocodingClient = mbxGeocoding({ accessToken: process.env.MAPBOX_TOKEN });
 const mapBoxToken = process.env.MAPBOX_TOKEN;
-const cloudinary = require('cloudinary')
 
-cloudinary.config({
-  cloud_name: 'dcu4avexf',
-  api_key: '975771826326426',
-  api_secret: process.env.CLOUDINARY_SECRET
-})
 
 
 exports.viewCreateScreen = function (req, res) {
@@ -41,7 +35,7 @@ exports.create = async function (req, res) {
   req.body.coordinates = response.body.features[0].geometry.coordinates
 
   let post = new Post(req.body, req.session.user._id)
-  console.log(post)
+  console.log("post:",post)
   console.log(post.coordinates)
   post.create().then(function (newId) {
     req.flash("success", "New post successfully created.")

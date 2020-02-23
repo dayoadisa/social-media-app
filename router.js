@@ -7,7 +7,7 @@ const postController = require('./controllers/postController')
 const layerController = require('./controllers/layerController')
 
 //user related routes
-router.get('/', userController.home)
+router.get('/',   userController.home )
 router.get('/create-register', userController.viewRegisterScreen)
 router.post('/register', userController.register)
 router.post('/login', userController.login)
@@ -15,6 +15,7 @@ router.post('/logout', userController.logout)
 
 //profile related routes
 router.get('/profile', userController.viewProfile)
+router.get('/layer-list/:username', userController.ifUserExists, userController.profileLayerScreen)
 
 //post related routes
 router.get('/create-building', userController.mustBeLoggedIn, postController.viewCreateScreen)
@@ -30,7 +31,9 @@ router.get('/list-buildings/:username', userController.ifUserExists, userControl
 
 //layer related routes
 router.get('/post/:id/layer/create-layer',   layerController.viewCreateLayer)
-router.post('/post/:id/layer/create-layer', userController.mustBeLoggedIn, upload.array('images', 10), layerController.createLayer)
+router.post('/post/:id/layer/create-layer', upload.array('images'), userController.mustBeLoggedIn, layerController.createLayer)
+router.get('/post/:id/layer/:id', userController.mustBeLoggedIn, layerController.viewSingle)
+
 //router.get('/post/:id/layer/:id/layer-edit', layerController.viewEditLayer)
 //router.post('/post/:id/layer/:/layer-edit', userController.mustBeLoggedIn, layerController.editLayer)
 

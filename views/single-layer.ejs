@@ -1,0 +1,38 @@
+<%- include('includes/header') %>
+<%- include('includes/sidebar') %>
+<%- include('includes/topbar') %>
+
+<div class="container py-md-5 container--narrow">
+  <h2><%= layer.name %></h2>
+  <h2><%= layer.address %></h2>
+  <h2><%= layer.layerName %></h2>
+  <h2><%= layer.floor %></h2>
+  <table class="table">
+    <caption>List of users</caption>
+    <thead>
+      <tr>
+        <th scope="col">Floor Number</th>
+        <th scope="col">Building Name</th>
+        <th scope="col">Address</th>
+        <th scope="col">Floor-Name</th>
+        
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th scope="row"><%= layer.floor %></th>
+        <td><%= layer.name %></td>
+        <td><%= layer.address %></td>
+        <td><%= layer.layerName %></td>
+       
+      </tr>
+      
+    </tbody>
+  </table>
+</div>
+
+    
+
+
+<%- include('includes/footer') %>
+<%- include('includes/scripts') %>
