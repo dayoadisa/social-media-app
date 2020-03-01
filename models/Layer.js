@@ -10,14 +10,13 @@ let Layer = function(data, userid, requestedPostId) {
     this.data = data
     this.errors = []
     this.userid = userid
-  
     this.requestPostId = requestedPostId
 }
 
 Layer.prototype.cleanUp = function() {
  if(typeof (this.data.layerName) != 'string') {this.data.layerName = "" }
  if(typeof(this.data.floor) != 'string') {this.data.floor = ""}
-if(typeof(this.data.images) != 'string') {this.data.images = ""}
+//if(typeof(this.data.images) != 'string') {this.data.images = ""}
     
         this.data = {
             name: this.data.name,
@@ -57,7 +56,39 @@ Layer.prototype.create = function() {
     })
 }
 
-Layer.reusablePostQuery = function (uniqueOperations) {
+
+Layer.prototype.update = function () {
+    return new Promise(async (resolve, reject) => {
+        try {
+            let layer = await Layer.findSingleById(this.requestedPostId, this.userid)
+            if (layer.isVisitorOwner) {
+                //actually update the db
+                let status = await this.actuallyUpdate()
+                resolve(status)
+            } else {
+                reject()
+            }
+        } catch {
+            reject()
+        }
+    })
+}
+
+Layer.prototype.actuallyUpdate = function () {
+    return new Promise(async (resolve, reject) => {
+        this.cleanUp()
+        this.validate()
+        if (!this.errors.length) {
+            await layersCollection.findOneAndUpdate({ _id: new ObjectID(this.requestedPostId) }, { $set: { layerName: this.data.layerName, floor: this.data.floor, 
+                images: this.data.images, address: this.data.address, coordinates: this.data.coordinates } })
+            resolve("success")
+        } else {
+            resolve("failure")
+        }
+    })
+}
+
+Layer.reusablePostQuery = function (uniqueOperations, visitorId) {
     return new Promise(async function (resolve, reject) {
         let aggOperations = uniqueOperations.concat([
             { $lookup: { from: "users", localField: "author", foreignField: "_id", as: "authorDocument" } },
@@ -79,7 +110,7 @@ Layer.reusablePostQuery = function (uniqueOperations) {
 
         //clean up author property in each post object
         layers = layers.map(function (layer) {
-
+            layer.isVisitorOwner = layer.authorId.equals(visitorId)
             
 
             layer.author = {
@@ -97,7 +128,7 @@ Layer.reusablePostQuery = function (uniqueOperations) {
 }
 
 
-Layer.findSingleById = function (id) {
+Layer.findSingleById = function (id, visitorId) {
     return new Promise(async function (resolve, reject) {
         if (typeof(id) != "string" || !ObjectID.isValid(id)) {
             reject()
@@ -106,7 +137,7 @@ Layer.findSingleById = function (id) {
 
         let layers = await Layer.reusablePostQuery([
             { $match: { _id: new ObjectID(id) } }
-        ])
+        ], visitorId)
 
         if (layers.length) {
             console.log(layers[0])
@@ -114,6 +145,9 @@ Layer.findSingleById = function (id) {
         } else {
             reject()
         }
+
+       
+        
     })
 }
 

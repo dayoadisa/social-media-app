@@ -102,7 +102,7 @@ exports.profilePostScreen = function (req, res) {
 
 }
 
-exports.profileLayerScreen =  function (req, res, next) {
+exports.profileLayerScreen =  function (req, res) {
 
     
     

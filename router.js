@@ -1,5 +1,5 @@
 const express = require('express')
-const router = express.Router()
+const router = express.Router({mergeParams: true})
 const multer = require('multer')
 const upload = multer({ 'dest': 'uploads/' })
 const userController = require('./controllers/userController')
@@ -31,11 +31,10 @@ router.get('/list-buildings/:username', userController.ifUserExists, userControl
 
 //layer related routes
 router.get('/post/:id/layer/create-layer',   layerController.viewCreateLayer)
-router.post('/post/:id/layer/create-layer', upload.array('images'), userController.mustBeLoggedIn, layerController.createLayer)
-router.get('/post/:id/layer/:id', userController.mustBeLoggedIn, layerController.viewSingle)
-
-//router.get('/post/:id/layer/:id/layer-edit', layerController.viewEditLayer)
-//router.post('/post/:id/layer/:/layer-edit', userController.mustBeLoggedIn, layerController.editLayer)
+router.get('/post/:id/layer/:id',  layerController.viewSingle)
+router.post('/post/:id/layer/create-layer', upload.array('images', 4), userController.mustBeLoggedIn, layerController.createLayer)
+router.get('/layer/:id/edit', layerController.viewEditLayer)
+router.post('/layer/:id/edit', userController.mustBeLoggedIn, layerController.edit)
 
 
 

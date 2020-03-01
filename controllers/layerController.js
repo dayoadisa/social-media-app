@@ -1,5 +1,5 @@
-const Post = require('../models/Post')
 const Layer = require('../models/Layer')
+const Post = require('../models/Post')
 const mbxGeocoding = require('@mapbox/mapbox-sdk/services/geocoding');
 const geocodingClient = mbxGeocoding({ accessToken: process.env.MAPBOX_TOKEN });
 const mapBoxToken = process.env.MAPBOX_TOKEN;
@@ -44,7 +44,7 @@ exports.createLayer = async function(req, res) {
   }
 
   let layer = new Layer(req.body, req.session.user._id, req.params.id, req.visitorId)
-  console.log("layer:",layer)
+  
   layer.create().then((newId) => {
       req.flash("success", "New Floor successfully created")
       req.session.save(() => res.redirect(`/post/${req.params.id}/layer/${newId}`))
@@ -56,13 +56,66 @@ exports.createLayer = async function(req, res) {
 }
 
 
+
+
+
+
 exports.viewSingle = async function (req, res) {
+  
   try {
     let layer = await Layer.findSingleById(req.params.id, req.visitorId)
-    res.render('single-layer', {layer: layer})
+    res.render('single-layer', { layer: layer, post: req.params.id, mapBoxToken: process.env.MAPBOX_TOKEN})
   } catch {
-    res.render("404")
+    res.render('404')
+  } 
+}
+
+exports.viewEditLayer = async function(req, res) {
+  
+  try {
+    let layer = await Layer.findSingleById(req.params.id, req.visitorId)
+    res.render('edit-layer', { layer: layer, post: req.params.id})
+  } catch {
+    res.render('404')
+  } 
+}
+
+exports.edit = async function (req, res) {
+
+
+  req.body.images = []
+  for(const file of req.files) {
+    let image = await cloudinary.v2.uploader.upload(file.path)
+    req.body.images.push({
+      url: image.secure_url,
+      public_id: image.public_id
+    })
   }
   
- 
+  let layer = new Layer(req.body, req.visitorId, req.params.id)
+  layer.update().then((status) => {
+    // the post was successfully updated in the database
+    // or user did have permission, but there were validation errors
+    if (status == "success") {
+      // post was updated in db
+      req.flash("success", "Post successfully updated.")
+      req.session.save(function () {
+        res.redirect(`/layer/${req.params.id}/edit`)
+      })
+    } else {
+      layer.errors.forEach(function (error) {
+        req.flash("errors", error)
+      })
+      req.session.save(function () {
+        res.redirect(`/layer/${req.params.id}/edit`)
+      })
+    }
+  }).catch(() => {
+    // a post with the requested id doesn't exist
+    // or if the current visitor is not the owner of the requested post
+    req.flash("errors", "You do not have permission to perform that action.")
+    req.session.save(function () {
+      res.redirect("/")
+    })
+  })
 }
