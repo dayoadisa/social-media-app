@@ -455,7 +455,8 @@ textarea.tall-textarea {
     }
 
     .mapboxgl-popup {
-      max-width: 200px;
+      max-width: 400px;
+      font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
     }
     
     .mapboxgl-popup-content {
@@ -463,6 +464,30 @@ textarea.tall-textarea {
       font-family: 'Open Sans', sans-serif;
     }
 
+    .floor-btn {
+      position: absolute;
+      bottom: 60px;
+      right: 15px;
+      margin: 20px auto;
+      padding: 10px;
+      border: none;
+      border-radius: 3px;
+      font-size: 12px;
+      text-align: center;
+    }
+
+  
+  
+  .btn-circle {
+      width: 30px;
+      height: 30px;
+      color: red;
+      padding: 6px 0px;
+      border-radius: 15px;
+      text-align: center;
+      font-size: 12px;
+      line-height: 1.42857;
+  }
     /* profile related styles */
 
     

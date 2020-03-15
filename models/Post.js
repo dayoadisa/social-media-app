@@ -3,14 +3,19 @@ const ObjectID = require('mongodb').ObjectID
 const User = require('./User')
 const Layer = require('./Layer')
 const sanitizeHTML = require('sanitize-html')
+var GeoJSON = require('geojson')
 
 
+
+
+//GeoJSON.parse(this.data, {Point: ['lat', 'lng']});
 
 let Post = function (data, userid, requestedPostId) {
     this.data = data
     this.errors = []
     this.userid = userid
     this.requestedPostId = requestedPostId
+    
 }
 
 
@@ -29,22 +34,14 @@ Post.prototype.cleanUp = function () {
         createdDate: new Date(),
         author: ObjectID(this.userid),
         coordinates: this.data.coordinates,
-        geometry: {
-            type: {
-                type: String,
-                enum: ['Point'],
-                required: true
-            },
-            coordinates: this.data.coordinates,
-        },
-        properties: {
-            description: String
-        },
-
-
+        
     }
-
+    let geoj = GeoJSON.parse(this.data, {Point: ['lat', 'lng']});
+    
 }
+
+
+
 
 Post.prototype.validate = function () {
     if (this.data.name == "") { this.errors.push("You must provide building name") }
@@ -198,13 +195,19 @@ Post.search = function (searchTerm) {
     })
 }
 
-Post.findAll = function () {
-    let posts = postsCollection.find().toArray(function (err, result) {
-        if (err) throw err;
-        console.log('new:', result);
 
 
+Post.findAll =  function () {
+    return new Promise((resolve, reject) => {
+      let posts =  postsCollection.find({}).toArray((err, posts) => {
+            err
+            ? reject(err)
+            : resolve(posts)
+            console.log('post:', posts)
+            
+        })
     })
+
 }
 
 

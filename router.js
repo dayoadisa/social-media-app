@@ -21,17 +21,18 @@ router.get('/layer-list/:username', userController.ifUserExists, userController.
 router.get('/create-building', userController.mustBeLoggedIn, postController.viewCreateScreen)
 router.post('/create-building', userController.mustBeLoggedIn, postController.create)
 router.post('/search', postController.search)
-router.get('/locations', postController.viewLocations)
+router.get('/locations', userController.mustBeLoggedIn, postController.viewLocations)
 router.get('/post/:id', postController.viewBuilding)
 router.get('/post/:id/edit', postController.viewEditScreen)
 router.post('/post/:id/edit', userController.mustBeLoggedIn, postController.edit)
 router.post('/post/:id/delete', userController.mustBeLoggedIn, postController.delete)
-router.get('/list-buildings/:username', userController.ifUserExists, userController.profilePostScreen)
+router.get('/list-buildings/:username', userController.mustBeLoggedIn, userController.ifUserExists, userController.profilePostScreen)
 
 
 //layer related routes
 router.get('/post/:id/layer/create-layer',   layerController.viewCreateLayer)
 router.get('/post/:id/layer/:id',  layerController.viewSingle)
+router.get('/post/:id/layer/:id',  layerController.viewBuildingLayers)
 router.post('/post/:id/layer/create-layer', upload.array('images', 4), userController.mustBeLoggedIn, layerController.createLayer)
 router.get('/layer/:id/edit', layerController.viewEditLayer)
 router.post('/layer/:id/edit', userController.mustBeLoggedIn, layerController.edit)

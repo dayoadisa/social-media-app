@@ -46,6 +46,7 @@ Layer.prototype.create = function() {
             //save post into database
             layersCollection.insertOne(this.data).then((info) => {
                 resolve(info.ops[0]._id)
+                console.log(JSON.stringify(info, null, 2))
             }).catch(() => {
                 this.errors.push("Please try again later")
                 reject(this.errors)
@@ -151,12 +152,50 @@ Layer.findSingleById = function (id, visitorId) {
     })
 }
 
+Layer.findSingleById = function (id, visitorId) {
+    return new Promise(async function (resolve, reject) {
+        if (typeof(id) != "string" || !ObjectID.isValid(id)) {
+            reject()
+            return
+        }
+
+        let layers = await Layer.reusablePostQuery([
+            { $match: { _id: new ObjectID(id) } }
+        ], visitorId)
+
+        if (layers.length) {
+            console.log(layers[0])
+            resolve(layers[0])
+        } else {
+            reject()
+        }
+
+       
+        
+    })
+}
+
+
 
 Layer.findByAuthorId = function (authorId) {
     return Layer.reusablePostQuery([
         { $match: { author: authorId } },
         { $sort: { createdDate: -1 } }
     ])
+}
+
+
+Layer.findAll =  function () {
+    return new Promise((resolve, reject) => {
+      let layers =  layersCollection.find({}).toArray((err, layers) => {
+            err
+            ? reject(err)
+            : resolve(layers)
+            console.log('layerB:', layers)
+            
+        })
+    })
+
 }
 
 

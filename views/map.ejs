@@ -97,6 +97,14 @@
       .setHTML('<h3>' + post.name + '</h3><p>' + post.address + '</p>'))
     .addTo(map);
 
+    markerEl.addEventListener('click', () => {
+    map.flyTo({
+        center: post.geometry.coordinates[0],
+        zoom: 11,
+    });
+});
+
+
 
 
 </script>

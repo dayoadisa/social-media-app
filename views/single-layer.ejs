@@ -16,40 +16,19 @@
 
       <div id="map"></div>
 
+
       
-        <div class="form-card">
-          <div class="card " style="width: 24rem;">
-            <div class="card-body">
-              
-              <form action="/layer/<%= layer._id %>/edit" method="POST" enctype="multipart/form-data">
-                
-          
-                <div class="form-group ">
-                  <label for="layer-name" class="text-muted mb-1"><small>Layer-Name</small></label>
-                  <input required value="<%= layer.layerName %>" name="layerName" id="layerName" class="form-control form-control-lg form-control-title"
-                    type="text" placeholder="" autocomplete="off">
-                </div>
-          
-                <div class="form-group ">
-                  <label for="floor" class="text-muted mb-1"><small>Floor</small></label>
-                  <input required name="floor" value="<%= layer.floor %>" id="floor" class="form-control form-control-lg form-control-title" type="number"
-                    placeholder="" autocomplete="off">
-                </div>
-          
-            
-          
-                <div class="form-group">
-                  <label for="layer-address" class="text-muted mb-1"><small>Address</small></label>
-                  <input required value="<%= layer.address %>" name="address" id="layer-address"
-                    class="form-control form-control-lg form-control-title" type="search" autocomplete="off">
-                </div>
-          
-                <button class="btn btn-primary btn-block">Update</button>
-              </form>
-              
-            </div>
-          </div>
-        </div>
+        <nav class="nav flex-column floor-btn">
+          <a class="nav-link active btn btn-primary btn-circle btn-lg" href="#"><%= layers.floor %></a>
+        </nav>
+      
+
+
+      
+      
+        
+        
+        
    
   </div>
 <!-- End of Main Content -->
@@ -78,52 +57,65 @@
 
 <script>
   mapboxgl.accessToken = '<%= mapBoxToken %>';
-  var layer = <%- JSON.stringify(layer) %>;
+  var layers = <%- JSON.stringify(layers) %>;
 
 
   var map = new mapboxgl.Map({
     container: 'map',
     style: 'mapbox://styles/mapbox/streets-v11',
-    center: (layer.coordinates),
+    center: (layers.coordinates),
     zoom: 16
   });
 
 
-map.on('load', function() {
+var image = map.on('load', function() {
       map.loadImage(
-        '<%= layer.images[0].url %>',
+        '<%= layers.images[0].url %>',
         function(error, image) {
           if (error) throw error;
-              map.addImage('cat', image);
+              map.addImage('layer', image);
               map.addSource('point', {
-              'type': 'geojson',
-              'data': {
-              'type': 'FeatureCollection',
-              'features': [
+                'type': 'geojson',
+                'data': {
+                'type': 'FeatureCollection',
+                'features': [
               {
-              'type': 'Feature',
-              'geometry': {
-              'type': 'Point',
-              'coordinates': (layer.coordinates)
-              }
-              }
-              ]
-              }
-              });
+                'type': 'Feature',
+                'geometry': {
+                'type': 'Point',
+                'coordinates': (layers.coordinates)
+                            }
+                          }
+                        ]
+                      }
+                    });
               map.addLayer({
-              'id': 'points',
-              'type': 'symbol',
-              'source': 'point',
-              'layout': {
-              'icon-image': 'cat',
-              'icon-size': 0.25
-              }
-              });
-              }
-              );
+                'id': 'points',
+                'type': 'symbol',
+                'source': 'point',
+                'layout': {
+                'icon-image': 'layer',
+                'icon-size': 1.05
+                          }
+                      });
+                    }
+                  );
               });
 
+var marker = new mapboxgl.image({
+draggable: true
+})
+.setLngLat([0, 0])
+.addTo(map);
  
+function onDragEnd() {
+var lngLat = marker.getLngLat();
+coordinates.style.display = 'block';
+coordinates.innerHTML =
+'Longitude: ' + lngLat.lng + '<br />Latitude: ' + lngLat.lat;
+}
+ 
+marker.on('dragend', onDragEnd);
 
 
 
@@ -132,61 +124,6 @@ map.on('load', function() {
 <%- include('includes/scripts') %>
 
 
-<!-- 
-<div class="container py-md-5 container--narrow">
-  <div id="add" style="width: 10.2rem; margin-left: 550px;">
-    <%- include('includes/flash') %>
-   
-    
-      
-    <div class="card-header">
-     
-
-      <button type="button" class="btn btn-default" aria-label="Left Align">
-        <a href="/layer/<%= layer._id %>/edit"><i class="fas fa-edit"></i></a>
-      </button>
-
-      <form class="delete-post-form d-inline" action="/post/<%= post._id %>/layer/<%= layer._id %>/delete" method="POST">
-        <button class="delete-post-button text-danger" data-toggle="tooltip" data-placement="top" title="Delete"><i
-            class="fas fa-trash"></i></button>
-      </form>
-    </div>
- 
-
-  </div>
-  
-  <h2><%= layer.name %></h2>
-  <h2><%= layer.address %></h2>
-  <h2><%= layer.layerName %></h2>
-  <h2><%= layer.floor %></h2>
-  <table class="table">
-    <caption>List of floors</caption>
-    <thead>
-      <tr>
-        <th scope="col">Floor Number</th>
-        <th scope="col">Building Name</th>
-        <th scope="col">Address</th>
-        <th scope="col">Floor-Name</th>
-        
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <th scope="row"><%= layer.floor %></th>
-        <td><%= layer.name %></td>
-        <td><%= layer.address %></td>
-        <td><%= layer.layerName %></td>
-       
-
-       
-      </tr>
-      
-    </tbody>
-  </table>
-
-  <div> <img src="<%= layer.images[0].url %>" width="100px" alt="floormap" > </div>
-
-</div>
 
 
 

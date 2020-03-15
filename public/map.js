@@ -1,7 +1,8 @@
+
 var map = new mapboxgl.Map({
     container: 'map',
     style: 'mapbox://styles/mapbox/light-v9',
-    center: [-98.55562, 39.809734],
+    center: [24.944312, 60.164923 ],
     zoom: 3.3
 });
 
@@ -80,7 +81,7 @@ map.on('load', function() {
     });
 
     map.on('click', 'unclustered-point', function(e) {
-      var coordinates = e.features[0].geometry.coordinates.slice();
+      var coordinates = e.features[0].coordinates.slice();
       var description = e.features[0].properties.description;
 
       // Ensure that if the map is zoomed out such that multiple
@@ -105,7 +106,7 @@ map.on('load', function() {
                 return;
 
             map.easeTo({
-                center: features[0].geometry.coordinates,
+                center: features[0].post.coordinates,
                 zoom: zoom
             });
         });

@@ -43,7 +43,7 @@ exports.createLayer = async function(req, res) {
     })
   }
 
-  let layer = new Layer(req.body, req.session.user._id, req.params.id, req.visitorId)
+  let layer = new Post(req.body, req.session.user._id, req.params.id, req.visitorId)
   
   layer.create().then((newId) => {
       req.flash("success", "New Floor successfully created")
@@ -53,6 +53,7 @@ exports.createLayer = async function(req, res) {
     req.session.save(() => res.redirect(`/post/${req.params.id}/layer/create-layer`))
   })
   
+  
 }
 
 
@@ -61,13 +62,21 @@ exports.createLayer = async function(req, res) {
 
 
 exports.viewSingle = async function (req, res) {
+
   
-  try {
-    let layer = await Layer.findSingleById(req.params.id, req.visitorId)
-    res.render('single-layer', { layer: layer, post: req.params.id, mapBoxToken: process.env.MAPBOX_TOKEN})
-  } catch {
-    res.render('404')
-  } 
+   try {
+     let layers = await Layer.findSingleById(req.params.id, req.visitorId)
+      
+      res.render('single-layer', {  layers: layers, post: req.params.id, mapBoxToken: process.env.MAPBOX_TOKEN})
+     
+     
+   } catch {
+     res.render('404')
+   } 
+}
+
+exports.viewBuildingLayers = function (req, res) {
+
 }
 
 exports.viewEditLayer = async function(req, res) {

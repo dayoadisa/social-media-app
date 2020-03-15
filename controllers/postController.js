@@ -1,3 +1,4 @@
+const postsCollection = require('../db').db().collection('posts')
 const Post = require('../models/Post')
 const Layer = require('../models/Layer')
 const mbxGeocoding = require('@mapbox/mapbox-sdk/services/geocoding');
@@ -13,13 +14,18 @@ exports.viewCreateScreen = function (req, res) {
 
 
 exports.viewLocations = async function (req, res) {
-  //   //ask our post model for posts by a certain author id
-  let posts = await Post.findAll()
-  console.log(posts)
-  res.render('locations', { posts: posts, mapBoxToken: process.env.MAPBOX_TOKEN })
-
+  
+  try {
+    let posts = await Post.findAll()
+    console.log('results:', posts)
+    res.render('locations', { posts: posts, mapBoxToken: process.env.MAPBOX_TOKEN })
+    
+  } catch {
+    res.render('404')
+  }
+      
+    
 }
-
 
 
 
