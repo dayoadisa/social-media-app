@@ -488,6 +488,12 @@ textarea.tall-textarea {
       font-size: 12px;
       line-height: 1.42857;
   }
+
+  .close-button {
+    position: absolute;
+    left: 10px;
+    padding: 5px 5px 5px 5px;
+  }
     /* profile related styles */
 
     

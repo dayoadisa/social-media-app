@@ -30,11 +30,12 @@ router.get('/list-buildings/:username', userController.mustBeLoggedIn, userContr
 
 
 //layer related routes
-router.get('/post/:id/layer/create-layer',   layerController.viewCreateLayer)
-router.get('/post/:id/layer/:id',  layerController.viewSingle)
+router.get('/layer/create-layer',   layerController.viewCreateLayer)
+router.get('/layer/:id',  layerController.viewSingle)
 router.get('/post/:id/layer/:id',  layerController.viewBuildingLayers)
-router.post('/post/:id/layer/create-layer', upload.array('images', 4), userController.mustBeLoggedIn, layerController.createLayer)
-router.get('/layer/:id/edit', layerController.viewEditLayer)
+router.post('/layer/create-layer', upload.array('images', 10), userController.mustBeLoggedIn, layerController.createLayer)
+router.post('/layer/:id/add-more-layer', upload.array('images', 10), userController.mustBeLoggedIn, layerController.addMoreLayer)
+router.get('/layer/:id/edit', userController.mustBeLoggedIn, layerController.viewEditLayer)
 router.post('/layer/:id/edit', userController.mustBeLoggedIn, layerController.edit)
 
 

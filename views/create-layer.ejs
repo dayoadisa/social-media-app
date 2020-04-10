@@ -9,7 +9,7 @@
   <a class="small font-weight-bold" href="/post/<%= post._id %>">&laquo; Back</a>
   <h5 class="card-header mt-3">Create Layer</h5>
   <div class="card-body">
-    <form action="/post/<%= post._id %>/layer/create-layer" method="POST" enctype="multipart/form-data">
+    <form action="/layer/create-layer" method="POST" enctype="multipart/form-data">
       <div class="form-group ">
         <label for="post-name" class="text-muted mb-1"><big><strong><%= post.name %></strong></big></label>
         <input required value="<%= post.name %>" name="name" id="post-name"

@@ -57,8 +57,7 @@
   
 
   mapboxgl.accessToken = '<%= mapBoxToken %>';
-  var posts = <%- JSON.stringify(posts) %>;
-
+  var posts = {features: <%- JSON.stringify(posts) %> };
 
 
 
@@ -68,7 +67,7 @@ var map = new mapboxgl.Map({
     style: 'mapbox://styles/mapbox/light-v9',
     center: [24.655899, 60.205490],
     accessToken: mapboxgl.accessToken,
-    zoom: 2.8
+    zoom: 4
 });
 
 map.addControl(new MapboxGeocoder({
@@ -92,11 +91,7 @@ map.on('load', function() {
         source: "posts",
         filter: ["has", "point_count"],
         paint: {
-            // Use step expressions (https://www.mapbox.com/mapbox-gl-js/style-spec/#expressions-step)
-            // with three steps to implement three types of circles:
-            //   * Blue, 20px circles when point count is less than 100
-            //   * Yellow, 30px circles when point count is between 100 and 750
-            //   * Pink, 40px circles when point count is greater than or equal to 750
+            
             "circle-color": [
                 "step",
                 ["get", "point_count"],
@@ -144,8 +139,8 @@ map.on('load', function() {
     });
 
     map.on('click', 'unclustered-point', function(e) {
-      var coordinates = e.post.coordinates.slice();
-      var description = e.post.description;
+      var coordinates = e.features[0].geometry.coordinates.slice();
+      var description = e.features[0].properties.description;
 
       // Ensure that if the map is zoomed out such that multiple
       // copies of the feature are visible, the popup appears
@@ -169,7 +164,7 @@ map.on('load', function() {
                 return;
 
             map.easeTo({
-                center: post.coordinates,
+                center: features[0].geometry.coordinates,
                 zoom: zoom
             });
         });
@@ -189,29 +184,10 @@ map.on('load', function() {
 
 
 
-//  var geocoder = new ({
-//  accessToken: mapboxgl.accessToken,
-//  mapboxgl: mapboxgl
-
-//  });
-
-// var geocoder = document.getElementById('geocoder').appendChild(geocoder.onAdd(map));
-// myFunction()
-
-//   function myFunction() {
-//    return geocoder
-//   console.log(geocoder)
-//   }
-
-  
-
-
-  
-
 
 </script>
 
-
+<%- include('includes/scripts') %>
 
   
 

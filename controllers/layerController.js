@@ -1,3 +1,4 @@
+const layersCollection = require('../db').db().collection('layers')
 const Layer = require('../models/Layer')
 const Post = require('../models/Post')
 const mbxGeocoding = require('@mapbox/mapbox-sdk/services/geocoding');
@@ -43,15 +44,20 @@ exports.createLayer = async function(req, res) {
     })
   }
 
-  let layer = new Post(req.body, req.session.user._id, req.params.id, req.visitorId)
+  let layer = new Layer(req.body, req.session.user._id, req.params.id, req.visitorId)
   
   layer.create().then((newId) => {
       req.flash("success", "New Floor successfully created")
-      req.session.save(() => res.redirect(`/post/${req.params.id}/layer/${newId}`))
+      req.session.save(() => res.redirect(`/layer/${newId}`))
   }).catch(function (errors) {
     errors.forEach(error => req.flash("errors", error))
-    req.session.save(() => res.redirect(`/post/${req.params.id}/layer/create-layer`))
+    req.session.save(() => res.redirect(`/layer/create-layer`))
   })
+  
+  
+}
+
+exports.addMoreLayer = async function(req, res) {
   
   
 }
@@ -83,23 +89,36 @@ exports.viewEditLayer = async function(req, res) {
   
   try {
     let layer = await Layer.findSingleById(req.params.id, req.visitorId)
-    res.render('edit-layer', { layer: layer, post: req.params.id})
+    if (layer.isVisitorOwner) {
+      res.render("edit-layer", { layer: layer })
+    } else {
+      req.flash("errors", "You do not have permission to perform that action.")
+      req.session.save(() => res.redirect("/"))
+    }
+    
   } catch {
     res.render('404')
   } 
 }
 
+
+
 exports.edit = async function (req, res) {
 
-
-  req.body.images = []
-  for(const file of req.files) {
-    let image = await cloudinary.v2.uploader.upload(file.path)
-    req.body.images.push({
-      url: image.secure_url,
-      public_id: image.public_id
-    })
+  // check if there are new images for upload
+  //req.body.images = []
+  if(req.files) {
+    //upload images
+    for(const file of req.files) {
+      let image = await cloudinary.v2.uploader.upload(file.path)
+      req.body.images.push({
+        url: image.secure_url,
+        public_id: image.public_id
+      })
+    }
   }
+  
+  //find layer the to delete
   
   let layer = new Layer(req.body, req.visitorId, req.params.id)
   layer.update().then((status) => {
@@ -127,4 +146,5 @@ exports.edit = async function (req, res) {
       res.redirect("/")
     })
   })
+ 
 }

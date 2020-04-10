@@ -13,12 +13,12 @@
     
     
     <% layers.forEach(function(layer) { %>
-      
-        <a href="/post/<%= post._id %>/layer/<%= layer._id %>" class="list-group-item list-group-item-action">
+     
+        <a href="/layer/<%= layer._id %>" class="list-group-item list-group-item-action">
     
-            <strong><%= layer.name %></strong> <br>
+          <strong><%= layer.name %></strong> <br>
         
-            <strong>Floors: <%= layer.floor %></strong>
+            <strong>Floors: <%= layer.info[0].floor %></strong>
       
         </a>
     <%  }) %>

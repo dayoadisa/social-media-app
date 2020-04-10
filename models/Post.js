@@ -3,12 +3,7 @@ const ObjectID = require('mongodb').ObjectID
 const User = require('./User')
 const Layer = require('./Layer')
 const sanitizeHTML = require('sanitize-html')
-var GeoJSON = require('geojson')
 
-
-
-
-//GeoJSON.parse(this.data, {Point: ['lat', 'lng']});
 
 let Post = function (data, userid, requestedPostId) {
     this.data = data
@@ -33,10 +28,21 @@ Post.prototype.cleanUp = function () {
         language: this.data.language.trim(),
         createdDate: new Date(),
         author: ObjectID(this.userid),
-        coordinates: this.data.coordinates,
+        geometry: {
+                    type: {
+                    type: String, 
+                    enum: ['Point'],
+                    required: true
+                    },
+                coordinates:this.data.coordinates
+            },
+            properties: {
+                description: this.data.name
+            },
+    
         
     }
-    let geoj = GeoJSON.parse(this.data, {Point: ['lat', 'lng']});
+    
     
 }
 
@@ -90,7 +96,9 @@ Post.prototype.actuallyUpdate = function () {
         this.cleanUp()
         this.validate()
         if (!this.errors.length) {
-            await postsCollection.findOneAndUpdate({ _id: new ObjectID(this.requestedPostId) }, { $set: { name: this.data.name, address: this.data.address, coordinates: this.data.coordinates } })
+          
+            await postsCollection.findOneAndUpdate({ _id: new ObjectID(this.requestedPostId) }, { $set: { name: this.data.name, address: this.data.address, 
+                "geometry.coordinates": this.data.geometry.coordinates } })
             resolve("success")
         } else {
             resolve("failure")
@@ -107,7 +115,7 @@ Post.reusablePostQuery = function (uniqueOperations, visitorId) {
                     name: 1,
                     address: 1,
                     createdDate: 1,
-                    coordinates: 1,
+                    geometry: 1,
                     authorId: "$author",
                     author: { $arrayElemAt: ["$authorDocument", 0] }
                 }

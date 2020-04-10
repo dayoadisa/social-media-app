@@ -81,7 +81,7 @@ map.on('load', function() {
     });
 
     map.on('click', 'unclustered-point', function(e) {
-      var coordinates = e.features[0].coordinates.slice();
+      var coordinates = e.features[0].geometry.coordinates.slice();
       var description = e.features[0].properties.description;
 
       // Ensure that if the map is zoomed out such that multiple
@@ -106,7 +106,7 @@ map.on('load', function() {
                 return;
 
             map.easeTo({
-                center: features[0].post.coordinates,
+                center: features[0].geometry.coordinates,
                 zoom: zoom
             });
         });

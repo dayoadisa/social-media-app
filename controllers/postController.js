@@ -15,16 +15,15 @@ exports.viewCreateScreen = function (req, res) {
 
 exports.viewLocations = async function (req, res) {
   
-  try {
-    let posts = await Post.findAll()
-    console.log('results:', posts)
-    res.render('locations', { posts: posts, mapBoxToken: process.env.MAPBOX_TOKEN })
-    
-  } catch {
-    res.render('404')
-  }
+    try {
+      let posts = await Post.findAll()
+      console.log('results:', posts)
+      res.render('locations', { posts: posts, mapBoxToken: process.env.MAPBOX_TOKEN })
       
-    
+      } catch {
+      res.render('404')
+    }
+         
 }
 
 
