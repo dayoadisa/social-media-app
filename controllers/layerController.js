@@ -90,7 +90,7 @@ exports.viewEditLayer = async function(req, res) {
   try {
     let layer = await Layer.findSingleById(req.params.id, req.visitorId)
     if (layer.isVisitorOwner) {
-      res.render("edit-layer", { layer: layer })
+      res.render("edit-layer", { layer: layer, post: req.params.id })
     } else {
       req.flash("errors", "You do not have permission to perform that action.")
       req.session.save(() => res.redirect("/"))
@@ -104,6 +104,14 @@ exports.viewEditLayer = async function(req, res) {
 
 
 exports.edit = async function (req, res) {
+  let response = await geocodingClient
+    .forwardGeocode({
+      query: req.body.address,
+      limit: 1,
+      autocomplete: true
+    })
+    .send()
+  req.body.coordinates = response.body.features[0].geometry.coordinates
 
   // check if there are new images for upload
   //req.body.images = []

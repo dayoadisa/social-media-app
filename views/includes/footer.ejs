@@ -22,12 +22,12 @@
   var placesAutocomplete = places({
     appId: 'plK444YP0LGX',
     apiKey: '62489659fe050d68fd2b4a3f4b9b2521',
-    container: document.querySelector('#post-address')
+    container: document.querySelector('#location')
   });
 
-  var $address = document.querySelector('#address-value')
+  var $location = document.querySelector('#address-value')
   placesAutocomplete.on('change', function(e) {
-    $address.textContent = e.suggestion.latlng.lat
+    $location.textContent = e.suggestion.latlng.lat
     
   });
 
@@ -40,7 +40,7 @@
   placesAutocomplete.on('change', e => console.log(e.suggestion));
 
   placesAutocomplete.on('clear', function() {
-    $address.textContent = 'none';
+    $location.textContent = 'none';
   });
 
   var $language = document.querySelector('#dynamic-language-selector')

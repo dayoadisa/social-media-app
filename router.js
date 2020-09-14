@@ -5,9 +5,30 @@ const upload = multer({ 'dest': 'uploads/' })
 const userController = require('./controllers/userController')
 const postController = require('./controllers/postController')
 const layerController = require('./controllers/layerController')
+const User = require('./models/User')
+const apiController = require('./controllers/apiController')
+const passport = require('passport')
+const {ensureAuth, ensureGuest} = require('./middleware/auth')
+//const {checkToken} = require('./middleware/token_validator')
+// tell the router to use checkToken function
+//router.use(checkToken)
+
+//Api related routes
+router.get('/api', apiController.apiLocations)
+router.get('/api/:id', apiController.viewBuilding)
+router.get('/post-building',  apiController.viewCreateForm)
+router.post('/post-building', apiController.create)
+router.get('/display-locations', userController.mustBeLoggedIn, apiController.displayLocations)
+
+
+//google related routes
+router.get('/auth/google',   passport.authenticate('google', { scope: ['profile']}) )
+router.get('/auth/google/callback',   passport.authenticate('google', { failureRedirect: '/'}), userController.googleLogin ) 
+
+router.get('/dashboard', ensureAuth, userController.dashboard )
 
 //user related routes
-router.get('/',   userController.home )
+router.get('/',  ensureGuest, userController.home )
 router.get('/create-register', userController.viewRegisterScreen)
 router.post('/register', userController.register)
 router.post('/login', userController.login)
@@ -30,14 +51,19 @@ router.get('/list-buildings/:username', userController.mustBeLoggedIn, userContr
 
 
 //layer related routes
-router.get('/layer/create-layer',   layerController.viewCreateLayer)
+router.get('/post/:id/layer/create-layer',   layerController.viewCreateLayer)
 router.get('/layer/:id',  layerController.viewSingle)
 router.get('/post/:id/layer/:id',  layerController.viewBuildingLayers)
 router.post('/layer/create-layer', upload.array('images', 10), userController.mustBeLoggedIn, layerController.createLayer)
 router.post('/layer/:id/add-more-layer', upload.array('images', 10), userController.mustBeLoggedIn, layerController.addMoreLayer)
 router.get('/layer/:id/edit', userController.mustBeLoggedIn, layerController.viewEditLayer)
-router.post('/layer/:id/edit', userController.mustBeLoggedIn, layerController.edit)
+router.post('/layer/:id/edit', userController.mustBeLoggedIn, upload.array('images', 10), layerController.edit)
 
 
 
 module.exports = router
+
+
+
+
+

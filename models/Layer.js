@@ -47,7 +47,7 @@ Layer.prototype.create = function() {
 
         if (!this.errors.length) {
             //create an index
-            layersCollection.createIndex( { "name": 1 }, { unique: true } )
+            //layersCollection.createIndex( { "name": 1 }, { unique: true } )
             //save post into database
             layersCollection.insertOne(this.data).then((info) => {
                 resolve(info.ops[0]._id)

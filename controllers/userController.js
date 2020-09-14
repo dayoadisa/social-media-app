@@ -1,11 +1,12 @@
 const User = require('../models/User')
 const Post = require('../models/Post')
 const Layer = require('../models/Layer')
-const login = require('../indoor-nav/buildings');
+const passport = require('../config/passport')
+
 
 
 exports.mustBeLoggedIn = function (req, res, next) {
-    if (req.session.user) {
+    if (req.session) {
         next()
     } else {
         req.flash("errors", "You must be logged In to perform that action")
@@ -14,6 +15,7 @@ exports.mustBeLoggedIn = function (req, res, next) {
         })
     }
 }
+
 
 exports.login = function (req, res) {
     let user = new User(req.body)
@@ -30,11 +32,24 @@ exports.login = function (req, res) {
     })
 }
 
-exports.logout = function (req, res) {
-    req.session.destroy(function () {
-        res.redirect('/')
+exports.googleLogin = function (req, res) {
+    //let user = new User(req.session)
+    console.log('session-user:', req.session)
+    req.session.save(function () {
+        res.redirect('/dashboard')
     })
 
+    
+}
+
+
+
+exports.logout = function (req, res) {
+     req.session.destroy(function () {
+         res.redirect('/')
+     })
+    //req.logout()
+    //res.redirect('/')
 }
 
 exports.viewRegisterScreen = function (req, res) {
@@ -73,6 +88,20 @@ exports.home = function (req, res) {
     }
 }
 
+exports.dashboard = function (req, res) {
+    res.render('dashboard', {
+                name: req.user.firstName
+            })
+    // if (req.session) {
+    //     res.render('dashboard', {
+    //         name: req.user.firstName
+    //     })
+        
+    //     console.log('session-user:', req.session)
+    // } else {
+    //     res.render('home-guest', { regErrors: req.flash('regErrors') })
+    // }
+}
 
 
 exports.ifUserExists = function (req, res, next) {

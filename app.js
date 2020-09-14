@@ -7,13 +7,11 @@ const csrf = require('csurf')
 const app = express()
 const cors = require('cors')
 const path = require('path')
+const morgan = require('morgan')
+const passport = require('passport')
 
-
-
-// Testing indoor-api
-require('./indoor-nav/login');
-require('./indoor-nav/buildings');
-
+//passport config
+require('./config/passport')(passport)
 
 let sessionOptions = session({
   secret: "Mindset is everything",
@@ -26,6 +24,11 @@ let sessionOptions = session({
 app.use(sessionOptions)
 app.use(flash())
 app.use(cors());
+
+//Create a new named format
+morgan.token("custom", ":http-version (:method) :url => :status")
+//use the new format by name
+app.use(morgan("custom"))
 
 app.use(function (req, res, next) {
   //make our markdown function available from within the ejs template
@@ -48,7 +51,9 @@ app.use(function (req, res, next) {
   next()
 })
 
-
+//passport middleware
+app.use(passport.initialize())
+app.use(passport.session())
 
 const router = require('./router')
 
@@ -56,10 +61,15 @@ app.use(express.urlencoded({ extended: false }))
 app.use(express.json())
 
 
+
 app.use(express.static('public'))
 app.set('views', 'views')
 app.set('view engine', 'ejs')
 
+
 app.use('/', router)
+
+
+//app.listen(process.env.PORT, console.log(`server is running on $`))
 
 module.exports = app
