@@ -121,7 +121,8 @@ exports.profilePostScreen = function (req, res) {
         res.render('list-buildings', {
             posts: posts,
             profileUsername: req.profileUser.username,
-            profileAvatar: req.profileUser.avatar
+            profileAvatar: req.profileUser.avatar,
+            
         })
     }).catch(function () {
 
