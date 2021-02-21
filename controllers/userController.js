@@ -117,11 +117,29 @@ exports.profilePostScreen = function (req, res) {
     
     //ask our post model for posts by a certain author id
     Post.findByAuthorId(req.profileUser._id).then(function (posts) {
+       
+          let currentPage = 1
+          const totalPages = posts.length
+          const page = +req.query.page;
+          const pageSize = 10;
+          const pageCount = Math.ceil(totalPages / pageSize);
+          
+          
+          if(req.query.page) {
+            currentPage = parseInt(req.query.page, 10);
+          }
+
+          const start = (currentPage - 1) * pageSize;
+          const end = currentPage * pageSize;
+         
 
         res.render('list-buildings', {
-            posts: posts,
+            posts: posts.slice(start, end),
             profileUsername: req.profileUser.username,
             profileAvatar: req.profileUser.avatar,
+            pageSize: pageSize,
+            pageCount: pageCount,
+            currentPage: currentPage,
             
         })
     }).catch(function () {
