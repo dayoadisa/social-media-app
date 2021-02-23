@@ -80,12 +80,40 @@ exports.register = function (req, res) {
     })
 }
 
+exports.ifUserExists = function (req, res, next) {
+    User.findByUsername(req.params.username).then(function (userDocument) {
+        req.profileUser = userDocument
+        next()
+    }).catch(function () {
+        res.render("404")
+    })
+}
+
 exports.home = function (req, res) {
-    if (req.session.user) {
-        res.render('vim-dashboard')
-    } else {
-        res.render('home-guest', { regErrors: req.flash('regErrors') })
-    }
+
+
+    Post.findAll().then(function (posts) {
+       
+        
+        const totalPages = posts.length
+        
+
+        if (req.session.user) {
+            res.render('vim-dashboard', {
+                totalPages: totalPages,
+                //profileUsername: req.profileUser.username,
+            })
+        } else {
+            res.render('home-guest', { regErrors: req.flash('regErrors') })
+        }
+        
+    
+  }).catch(function () {
+
+      res.render("404")
+  })
+
+  
 }
 
 exports.dashboard = function (req, res) {
@@ -104,14 +132,7 @@ exports.dashboard = function (req, res) {
 }
 
 
-exports.ifUserExists = function (req, res, next) {
-    User.findByUsername(req.params.username).then(function (userDocument) {
-        req.profileUser = userDocument
-        next()
-    }).catch(function () {
-        res.render("404")
-    })
-}
+
 
 exports.profilePostScreen = function (req, res) {
     
