@@ -18,7 +18,7 @@
     <div id="map">    
       <div class="icon-bar">
         
-        <a href="/api" data-toggle="tooltip" data-placement="Left" title="Back"><i class="fas fa-arrow-circle-left"></i></a>
+        <a href="/list-buildings/<%= user.username %>" data-toggle="tooltip" data-placement="Left" title="Back"><i class="fas fa-arrow-circle-left"></i></a>
         
         <a href="/post/<%= post._id %>/layer/create-layer" data-toggle="tooltip" data-placement="Left" title="Add floor"><i class="fa fa-layer-group"></i></a> 
 
@@ -27,7 +27,7 @@
         <form class="delete-post-form d-inline" action="/post/<%= post._id %>/delete" method="POST">
         
 
-        <button class="delete-post-button text-danger" data-toggle="tooltip" data-placement="top" title="Delete"><i
+        <button onclick ="return confirm('Are you sure you want to delete this building?')" class="delete-post-button text-danger" data-toggle="tooltip" data-placement="top" title="Delete"><i
           class="fa fa-trash"></i></button>
        
         </form>
@@ -74,6 +74,7 @@
 </div>
 
 <script>
+
   mapboxgl.accessToken = '<%= mapBoxToken %>';
   var post = <%- JSON.stringify(post) %>;
 
