@@ -42,7 +42,7 @@
     "nodemon": "^1.19.1",
     "passport": "^0.4.1",
     "passport-google-oauth20": "^2.0.0",
-    "sanitize-html": "^1.20.1",
+    "sanitize-html": "^2.3.2",
     "socket.io": "^2.2.0",
     "validator": "^11.1.0",
     "webpack": "^4.39.2",
