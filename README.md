@@ -1,2 +1,2 @@
-# Content Management System for building management
+# Social media app
 
